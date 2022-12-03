@@ -1,12 +1,32 @@
-export ONE=X2JF5GOPIC76CRXWWIM5AU74ZTYLPIVSMRP3FKAH56IJA7PO2252UJ3SF4
+export DEPLOYER=X2JF5GOPIC76CRXWWIM5AU74ZTYLPIVSMRP3FKAH56IJA7PO2252UJ3SF4
+export ONE=VGONDOM326TUMSAJFOHUBU6XWSLFKLGGZDVB7KVFFJ6BXA2BXUDVRO3QNQ
+export TWO=XVCLDGYI4KL26TIDPBM3TGZS57KJQVR4SLKLAO2ALO25OA5YWOUXP3LJHA
+export THREE=FCE7JFAP6GI45OTI5PXZPSBQGGSUT2R54NZR7SW7DXOFBCVUP6I5PECSOA
+
+# Mnemonics
+# 1
+reveal airport april evoke goose proud jealous whip seven allow raise hurt return labor fabric grape mutual vote attend fuel fossil amused hill above gloom
+# 2
+session aware list amount shoulder cradle lottery outside quality arctic season cloud million scissors stable artist artwork joke chalk gain garden include quick above aspect
+# 3
+split life seat street magnet valve mansion east client switch tip believe muffin balance adapt that throw silver magnet narrow length kind earth abandon summer
+
 
 # Deploy smart contract
 goal app create \
-    --creator $ONE \
+    --creator $DEPLOYER \
     --approval-prog ./build/approval.teal \
     --clear-prog ./build/clear.teal \
     --global-byteslices 1 \
     --global-ints 2 \
-    --local-byteslices 3 \
-    --local-ints 1 
-    --app-args "int:35"
+    --local-byteslices 0 \
+    --local-ints 1 \
+    --app-arg "int:35"
+
+goal app optin \
+    --app-id 146881194 \
+    --from $ONE
+
+goal app optin \
+    --app-id 146881194 \
+    --from $TWO

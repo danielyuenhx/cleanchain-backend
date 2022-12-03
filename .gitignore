@@ -1,5 +1,7 @@
 sandbox/
 dryrun.msog
 dryrun.json
+dr.msgp
 build/
 __pycache__/
+donate-*
