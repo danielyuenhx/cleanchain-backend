@@ -11,9 +11,6 @@ def approval():
     # Local attributes
     local_donation = Bytes("Donation")  # uint64
 
-    # Utility functions
-    is_creator =  Txn.sender() == Global.creator_address()
-
     # Operations
     op_donate = Bytes("Donate") # byteslice
     op_select = Bytes("Select") # byteslice
