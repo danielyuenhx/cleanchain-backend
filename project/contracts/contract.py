@@ -12,9 +12,9 @@ def approval():
     local_donation = Bytes("Donation")  # uint64
 
     # Operations
-    op_donate = Bytes("Donate") # byteslice
-    op_select = Bytes("Select") # byteslice
-    op_claim = Bytes("Claim") # byteslice
+    op_donate = Bytes("donate") # byteslice
+    op_select = Bytes("select") # byteslice
+    op_claim = Bytes("claim") # byteslice
 
     @Subroutine(TealType.none)
     def donate():
