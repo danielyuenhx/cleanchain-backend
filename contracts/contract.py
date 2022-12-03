@@ -12,7 +12,6 @@ def approval():
     local_donation = Bytes("Donation")  # uint64
 
     # Utility functions
-    app_address = Global.current_application_address()
     is_creator =  Txn.sender() == Global.creator_address()
 
     # Operations
@@ -32,11 +31,11 @@ def approval():
             Assert(
                 And(
                     # Check if account has opted in
-                    App.optedIn(Txn.sender(), app_address),
+                    App.optedIn(Txn.sender(), Global.current_application_id()),
 
                     Gtxn[1].type_enum() == TxnType.Payment,
-                    Gtxn[1].receiver() == app_address,
-                    Gtxn[1].close_remainder_to == Global.zero_address(),
+                    Gtxn[1].receiver() == Global.current_application_address(),
+                    Gtxn[1].close_remainder_to() == Global.zero_address(),
 
                     # Check if donation amount is specified
                     Txn.application_args.length() == Int(2)
@@ -59,13 +58,15 @@ def approval():
             ),
             program.check_rekey_zero(2),
             Assert(
-                App.optedIn(Txn.sender(), app_address),
+                And(
+                    App.optedIn(Txn.sender(), Global.current_application_id()),
 
-                Txn.type_enum() != TxnType.Payment,
+                    Txn.type_enum() != TxnType.Payment,
 
-                # Ensure that no one has already selected the project
-                App.globalGet(global_claimant) == Bytes(""),
-                Txn.application_args.length() == Int(0)
+                    # Ensure that no one has already selected the project
+                    App.globalGet(global_claimant) == Bytes(""),
+                    Txn.application_args.length() == Int(0)
+                ),
             ),
             App.globalPut(global_claimant, Txn.sender()),
             Approve()
@@ -81,18 +82,22 @@ def approval():
             ),
             program.check_rekey_zero(2),
             Assert(
-                # Whoever selected the project needs to claim funds
-                App.globalGet(global_claimant) != Bytes(""),
-                Txn.sender() == App.globalGet(global_claimant),
+                And(
+                    # Whoever selected the project needs to claim funds
+                    App.globalGet(global_claimant) != Bytes(""),
+                    Txn.sender() == App.globalGet(global_claimant),
 
-                Txn.application_args.length() == Int(2),  
+                    Txn.application_args.length() == Int(2),  
+                ),
             ),
 
             If (
                 Btoi(Txn.application_args[1]) >= App.globalGet(global_clean_threshold)
             ).Then(
-                Assert(Txn.fee() >= Global.min_txn_fee() * Int(2)),
-                send_bounty(Txn.sender(), App.globalGet(global_donation))
+                Seq(
+                    Assert(Txn.fee() >= Global.min_txn_fee() * Int(2)),
+                    send_bounty(Txn.sender(), App.globalGet(global_donation))
+                ),
             ).Else(
                 Reject()
             ),
@@ -127,10 +132,11 @@ def approval():
         ),
         no_op = Seq(
             Cond(
-                [Txn.application_args[0] == op_donate, donate()]
-                [Txn.application_args[0] == op_select, select()]
+                [Txn.application_args[0] == op_donate, donate()],
+                [Txn.application_args[0] == op_select, select()],
                 [Txn.application_args[0] == op_claim, claim()]
-            )
+            ),
+            Reject()
         )
     )
     

@@ -3,3 +3,4 @@ sandbox/
 dryrun.msog
 dryrun.json
 build/
+__pycache__/
