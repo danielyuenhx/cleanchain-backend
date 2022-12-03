@@ -27,19 +27,24 @@ def samplePoints():
 
 @app.route("/getSamplePoint/<location>")
 def samplePoint(location):
+    sample_point_url = "https://environment.data.gov.uk/water-quality/id/sampling-point/" + location
+    sample_point = requests.get(sample_point_url).json()['items'][0]
+
     geolocator = Nominatim(user_agent="geoapiExercises")
+    sample_point['location'] = geolocator.reverse(str(sample_point["lat"])+","+str(sample_point["long"])).raw['address']
 
-    print(location)
-    return "ok"
+    sample_point['bounty'] = bounties[sample_point['notation']]
 
-    # for point in sample_points: 
-    #     location = geolocator.reverse(str(point["lat"])+","+str(point["long"]))
+    return sample_point
 
 if __name__ == '__main__':
     sample_points_url = "https://environment.data.gov.uk/water-quality/id/sampling-point?samplingPointStatus=open"
     sample_points = requests.get(sample_points_url).json()['items']
+    bounties = dict()
 
     for sample in sample_points:
-        sample['bounty'] = randint(500,2000)
+        bounty = randint(500,2000)
+        bounties[sample['notation']] = bounty
+        sample['bounty'] = bounty
 
     app.run(host='localhost', port=8000, debug=True)
