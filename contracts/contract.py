@@ -45,7 +45,7 @@ def approval():
 
             # Store local donation for the specific user and add to the global donation
             scratch_donation.store(App.globalGet(global_donation)),
-            App.localPut(Txn.sender(), local_donation, Txn.application_args[1]),
+            App.localPut(Txn.sender(), local_donation, Btoi(Txn.application_args[1])),
             App.globalPut(global_donation, scratch_donation.load() + Btoi(Txn.application_args[1])),
             Approve()
         )
@@ -74,7 +74,44 @@ def approval():
 
     @Subroutine(TealType.none)
     def claim():
-        pass
+        return Seq(
+            program.check_self(
+                group_size = Int(1),
+                group_index = Int(0)
+            ),
+            program.check_rekey_zero(2),
+            Assert(
+                # Whoever selected the project needs to claim funds
+                App.globalGet(global_claimant) != Bytes(""),
+                Txn.sender() == App.globalGet(global_claimant),
+
+                Txn.application_args.length() == Int(2),  
+            ),
+
+            If (
+                Btoi(Txn.application_args[1]) >= App.globalGet(global_clean_threshold)
+            ).Then(
+                Assert(Txn.fee() >= Global.min_txn_fee() * Int(2)),
+                send_bounty(Txn.sender(), App.globalGet(global_donation))
+            ).Else(
+                Reject()
+            ),
+            Approve()
+        )
+
+    @Subroutine(TealType.none)
+    def send_bounty(account:Expr, amount: Expr):
+        return Seq(
+            InnerTxnBuilder.Begin(),
+            InnerTxnBuilder.SetFields({
+                TxnField.type_enum: TxnType.Payment,
+                TxnField.receiver: account,
+                TxnField.amount: amount,
+                TxnField.fee: Int(0)
+            }),
+            InnerTxnBuilder.Submit()
+        )
+        
 
     return program.event(
         init = Seq(
