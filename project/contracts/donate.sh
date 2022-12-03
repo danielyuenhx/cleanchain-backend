@@ -8,7 +8,6 @@ goal app call \
     --app-id "$APP_ID" \
     -f "$DONOR_ACCOUNT" \
     --app-arg "str:donate" \
-    --app-arg "str:$DONATION" \
     -o donate-call.tx 
 #output the transaction to a file instead of sending it
 #to the network since only a group of 2 transactions

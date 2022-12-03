@@ -34,15 +34,13 @@ def approval():
                     Gtxn[1].receiver() == Global.current_application_address(),
                     Gtxn[1].close_remainder_to() == Global.zero_address(),
 
-                    # Check if donation amount is specified
-                    Txn.application_args.length() == Int(2)
                 )
             ),
 
             # Store local donation for the specific user and add to the global donation
             scratch_donation.store(App.globalGet(global_donation)),
-            App.localPut(Txn.sender(), local_donation, Btoi(Txn.application_args[1])),
-            App.globalPut(global_donation, scratch_donation.load() + Btoi(Txn.application_args[1])),
+            App.localPut(Txn.sender(), local_donation, Gtxn[1].amount()),
+            App.globalPut(global_donation, scratch_donation.load() + Gtxn[1].amount()),
             Approve()
         )
 
@@ -62,7 +60,7 @@ def approval():
 
                     # Ensure that no one has already selected the project
                     App.globalGet(global_claimant) == Bytes(""),
-                    Txn.application_args.length() == Int(0)
+                    Txn.application_args.length() == Int(1)
                 ),
             ),
             App.globalPut(global_claimant, Txn.sender()),
@@ -134,6 +132,10 @@ def approval():
                 [Txn.application_args[0] == op_claim, claim()]
             ),
             Reject()
+        ),
+        delete=Seq(
+            Assert(Txn.sender() == Global.creator_address()),
+            Approve()
         )
     )
     
