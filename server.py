@@ -33,6 +33,7 @@ def samplePoint(location):
     geolocator = Nominatim(user_agent="geoapiExercises")
     sample_point['location'] = geolocator.reverse(str(sample_point["lat"])+","+str(sample_point["long"])).raw['address']
 
+    sample_point['isOpen'] = isOpens[sample_point['notation']]
     sample_point['bounty'] = bounties[sample_point['notation']]
 
     return sample_point
@@ -40,9 +41,14 @@ def samplePoint(location):
 if __name__ == '__main__':
     sample_points_url = "https://environment.data.gov.uk/water-quality/id/sampling-point?samplingPointStatus=open"
     sample_points = requests.get(sample_points_url).json()['items']
+    isOpens = dict()
     bounties = dict()
 
     for sample in sample_points:
+        isOpen = randint(0, 1)
+        isOpens[sample['notation']] = isOpen
+        sample['isOpen'] = isOpen
+
         bounty = randint(500,2000)
         bounties[sample['notation']] = bounty
         sample['bounty'] = bounty
