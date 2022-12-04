@@ -14,6 +14,7 @@ def approval():
     # Operations
     op_donate = Bytes("donate") # byteslice
     op_select = Bytes("select") # byteslice
+    op_deselect = Bytes("deselect") # byteslice
     op_claim = Bytes("claim") # byteslice
 
     @Subroutine(TealType.none)
@@ -51,6 +52,7 @@ def approval():
                 group_size = Int(1),
                 group_index = Int(0)
             ),
+            program.check_rekey_zero(1),
             Assert(
                 And(
                     App.optedIn(Txn.sender(), Global.current_application_id()),
@@ -65,6 +67,27 @@ def approval():
             App.globalPut(global_claimant, Txn.sender()),
             Approve()
         )
+
+    @Subroutine(TealType.none)
+    def deselect():
+        return Seq(
+             program.check_self(
+                group_size = Int(1),
+                group_index = Int(0)
+            ),
+            program.check_rekey_zero(1),
+            Assert(
+                And(
+                    App.optedIn(Txn.sender(), Global.current_application_id()),
+                    Txn.type_enum() != TxnType.Payment,
+
+                    App.globalGet(global_claimant) != Bytes(""),
+                    Txn.application_args.length() == Int(1)
+                ),
+            ),
+            App.globalPut(global_claimant, Bytes("")),
+            Approve()
+        )
         
 
     @Subroutine(TealType.none)
@@ -74,7 +97,7 @@ def approval():
                 group_size = Int(1),
                 group_index = Int(0)
             ),
-            program.check_rekey_zero(2),
+            program.check_rekey_zero(1),
             Assert(
                 And(
                     # Whoever selected the project needs to claim funds
@@ -128,6 +151,7 @@ def approval():
             Cond(
                 [Txn.application_args[0] == op_donate, donate()],
                 [Txn.application_args[0] == op_select, select()],
+                [Txn.application_args[0] == op_deselect, deselect()],
                 [Txn.application_args[0] == op_claim, claim()]
             ),
             Reject()
