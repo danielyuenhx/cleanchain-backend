@@ -51,7 +51,6 @@ def approval():
                 group_size = Int(1),
                 group_index = Int(0)
             ),
-            program.check_rekey_zero(2),
             Assert(
                 And(
                     App.optedIn(Txn.sender(), Global.current_application_id()),
@@ -134,6 +133,10 @@ def approval():
             Reject()
         ),
         delete=Seq(
+            Assert(Txn.sender() == Global.creator_address()),
+            Approve()
+        ),
+        update=Seq(
             Assert(Txn.sender() == Global.creator_address()),
             Approve()
         )
