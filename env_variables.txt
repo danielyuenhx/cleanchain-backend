@@ -24,9 +24,17 @@ goal app create \
     --app-arg "int:35"
 
 goal app optin \
-    --app-id 146881194 \
+    --app-id 146945426 \
     --from $ONE
 
 goal app optin \
-    --app-id 146881194 \
+    --app-id 146945426 \
     --from $TWO
+
+goal app update \
+    --app-id 146945426 \
+    --from $DEPLOYER \
+    --approval-prog ./build/approval.teal \
+    --clear-prog ./build/clear.teal
+
+goal app read --global --app-id 146945426 --from $ONE --guess-format
