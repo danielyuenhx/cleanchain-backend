@@ -9,4 +9,5 @@ goal app call \
     -f "$CLAIMANT_ACCOUNT" \
     --app-arg "str:claim" \
     --app-arg "str:40" \
-    --dryrun-dump -o dryrun.msog
+    --fee 2000
+    # --dryrun-dump -o dryrun.msog
