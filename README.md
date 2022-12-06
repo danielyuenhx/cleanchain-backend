@@ -71,6 +71,10 @@ You may run these scripts in the algod container.
 > bash ./donate.sh
 ```
 
-## Linking with CleanChain-Frontend
+## Linking with CleanChain-Frontend:
+
+Run data fetching API in the backend by using:
+
+python server.py
 
 Make note of the App ID of your smart contract app and enter it in the `appIndex` variable within the App.js file of the React app.
